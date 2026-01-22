@@ -9,14 +9,16 @@ let settings = {
     telegram: true,
     viber: true,
     signal: true
-  }
+  },
+  whatsappOpenMethod: 'web', // 'web', 'desktop', or 'wame'
+  autoSend: true
 };
 
 chrome.runtime.onInstalled.addListener(() => {
   // Load saved settings
   chrome.storage.sync.get(['settings'], (result) => {
     if (result.settings) {
-      settings = result.settings;
+      settings = { ...settings, ...result.settings };
     }
   });
 
@@ -90,7 +92,17 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       
       switch (info.menuItemId) {
         case 'whatsapp':
-          url = `https://wa.me/${phoneNumber}`;
+          // Choose URL based on settings
+          if (settings.whatsappOpenMethod === 'desktop') {
+            // WhatsApp Desktop protocol
+            url = `whatsapp://send?phone=${phoneNumber}`;
+          } else if (settings.whatsappOpenMethod === 'web') {
+            // WhatsApp Web
+            url = `https://web.whatsapp.com/send?phone=${phoneNumber}`;
+          } else {
+            // wa.me (lets system choose)
+            url = `https://wa.me/${phoneNumber}`;
+          }
           break;
         case 'telegram':
           url = `https://t.me/${phoneNumber}`;
@@ -104,7 +116,21 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       }
       
       if (url) {
-        chrome.tabs.create({ url: url });
+        chrome.tabs.create({ url: url }, (newTab) => {
+          // If WhatsApp Web and auto-send is enabled, send message to content script
+          if (info.menuItemId === 'whatsapp' && 
+              settings.whatsappOpenMethod === 'web' && 
+              settings.autoSend) {
+            // Wait for tab to load
+            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+              if (tabId === newTab.id && changeInfo.status === 'complete') {
+                chrome.tabs.onUpdated.removeListener(listener);
+                // Send message to content script to auto-click send
+                chrome.tabs.sendMessage(newTab.id, { action: 'autoSend' });
+              }
+            });
+          }
+        });
       }
     }
   }

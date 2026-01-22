@@ -12,6 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('telegram').checked = settings.enabledApps.telegram !== false;
       document.getElementById('viber').checked = settings.enabledApps.viber !== false;
       document.getElementById('signal').checked = settings.enabledApps.signal !== false;
+      
+      // Set WhatsApp open method
+      const openMethod = settings.whatsappOpenMethod || 'web';
+      document.getElementById('openWeb').checked = openMethod === 'web';
+      document.getElementById('openDesktop').checked = openMethod === 'desktop';
+      document.getElementById('openWaMe').checked = openMethod === 'wame';
+      
+      // Set auto-send
+      document.getElementById('autoSend').checked = settings.autoSend !== false;
     }
   });
 });
@@ -25,6 +34,14 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     return;
   }
   
+  // Get selected open method
+  let whatsappOpenMethod = 'web';
+  if (document.getElementById('openDesktop').checked) {
+    whatsappOpenMethod = 'desktop';
+  } else if (document.getElementById('openWaMe').checked) {
+    whatsappOpenMethod = 'wame';
+  }
+  
   const settings = {
     defaultCountryCode: countryCode,
     enabledApps: {
@@ -32,7 +49,9 @@ document.getElementById('saveBtn').addEventListener('click', () => {
       telegram: document.getElementById('telegram').checked,
       viber: document.getElementById('viber').checked,
       signal: document.getElementById('signal').checked
-    }
+    },
+    whatsappOpenMethod: whatsappOpenMethod,
+    autoSend: document.getElementById('autoSend').checked
   };
   
   chrome.storage.sync.set({ settings }, () => {

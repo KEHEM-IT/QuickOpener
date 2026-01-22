@@ -88,7 +88,34 @@
       cursor: pointer;
     }
 
+    input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
     .checkbox-group label {
+      margin: 0;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .radio-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .radio-group:hover {
+      background: #f0f0f0;
+    }
+
+    .radio-group label {
       margin: 0;
       cursor: pointer;
       flex: 1;
@@ -132,6 +159,42 @@
       color: #888;
       margin-top: 5px;
     }
+
+    .whatsapp-options {
+      margin-top: 10px;
+      padding: 15px;
+      background: #f0f9f4;
+      border-left: 3px solid #25D366;
+      border-radius: 4px;
+    }
+
+    .whatsapp-options .checkbox-group {
+      background: white;
+    }
+
+    .whatsapp-options .radio-group {
+      background: white;
+    }
+
+    .option-section {
+      margin-bottom: 20px;
+    }
+
+    .option-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .option-label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+      display: block;
+      font-size: 14px;
+    }
+
+    .indent {
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -154,6 +217,46 @@
       <div class="checkbox-group">
         <input type="checkbox" id="whatsapp" checked>
         <label for="whatsapp">WhatsApp</label>
+      </div>
+
+      <div class="whatsapp-options">
+        <div class="option-section">
+          <span class="option-label">Open WhatsApp using:</span>
+          
+          <div class="radio-group">
+            <input type="radio" id="openWeb" name="openMethod" value="web" checked>
+            <label for="openWeb">
+              <strong>WhatsApp Web</strong>
+              <p class="help-text">Opens in browser (web.whatsapp.com)</p>
+            </label>
+          </div>
+
+          <div class="radio-group">
+            <input type="radio" id="openDesktop" name="openMethod" value="desktop">
+            <label for="openDesktop">
+              <strong>WhatsApp Desktop App</strong>
+              <p class="help-text">Opens in installed WhatsApp desktop application</p>
+            </label>
+          </div>
+
+          <div class="radio-group">
+            <input type="radio" id="openWaMe" name="openMethod" value="wame">
+            <label for="openWaMe">
+              <strong>wa.me Link</strong>
+              <p class="help-text">Let system choose (may ask which app to use)</p>
+            </label>
+          </div>
+        </div>
+        
+        <div class="option-section">
+          <div class="checkbox-group">
+            <input type="checkbox" id="autoSend" checked>
+            <label for="autoSend">
+              <strong>Auto-click Send button</strong>
+              <p class="help-text">⚠️ Only works with WhatsApp Web - automatically clicks send when chat opens</p>
+            </label>
+          </div>
+        </div>
       </div>
 
       <div class="checkbox-group">
