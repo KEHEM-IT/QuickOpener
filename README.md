@@ -18,7 +18,7 @@ A Chrome extension that allows you to quickly open selected phone numbers in Wha
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable "Developer mode" in the top right corner
 3. Click "Load unpacked"
-4. Select the `QuickWhatsapp` folder
+4. Select the extension folder
 5. The extension is now installed!
 
 ## Usage
