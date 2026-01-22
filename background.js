@@ -8,9 +8,12 @@ let settings = {
     whatsapp: true,
     telegram: true,
     viber: true,
-    signal: true
+    signal: true,
+    youtube: true,
+    google: true
   },
   whatsappOpenMethod: 'web', // 'web', 'desktop', or 'wame'
+  telegramOpenMethod: 'web', // 'web' or 'desktop'
   autoSend: true
 };
 
@@ -79,19 +82,37 @@ function createContextMenus() {
         contexts: ['selection']
       });
     }
+
+    if (settings.enabledApps.youtube) {
+      chrome.contextMenus.create({
+        id: 'youtube',
+        parentId: 'openWith',
+        title: 'YouTube Search',
+        contexts: ['selection']
+      });
+    }
+
+    if (settings.enabledApps.google) {
+      chrome.contextMenus.create({
+        id: 'google',
+        parentId: 'openWith',
+        title: 'Google Search',
+        contexts: ['selection']
+      });
+    }
   });
 }
 
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.selectionText) {
-    const phoneNumber = cleanPhoneNumber(info.selectionText);
+    const selectedText = info.selectionText.trim();
+    let url = '';
     
-    if (phoneNumber) {
-      let url = '';
-      
-      switch (info.menuItemId) {
-        case 'whatsapp':
+    switch (info.menuItemId) {
+      case 'whatsapp':
+        const phoneNumber = cleanPhoneNumber(selectedText);
+        if (phoneNumber) {
           // Choose URL based on settings
           if (settings.whatsappOpenMethod === 'desktop') {
             // WhatsApp Desktop protocol
@@ -103,35 +124,79 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             // wa.me (lets system choose)
             url = `https://wa.me/${phoneNumber}`;
           }
-          break;
-        case 'telegram':
-          url = `https://t.me/${phoneNumber}`;
-          break;
-        case 'viber':
-          url = `viber://chat?number=${phoneNumber}`;
-          break;
-        case 'signal':
-          url = `https://signal.me/#p/${phoneNumber}`;
-          break;
-      }
-      
-      if (url) {
-        chrome.tabs.create({ url: url }, (newTab) => {
-          // If WhatsApp Web and auto-send is enabled, send message to content script
-          if (info.menuItemId === 'whatsapp' && 
-              settings.whatsappOpenMethod === 'web' && 
-              settings.autoSend) {
-            // Wait for tab to load
-            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-              if (tabId === newTab.id && changeInfo.status === 'complete') {
-                chrome.tabs.onUpdated.removeListener(listener);
-                // Send message to content script to auto-click send
-                chrome.tabs.sendMessage(newTab.id, { action: 'autoSend' });
-              }
-            });
+        }
+        break;
+        
+      case 'telegram':
+        // Check if it's a phone number or username/link
+        if (selectedText.startsWith('@') || selectedText.includes('t.me/')) {
+          // Username or link
+          let username = selectedText;
+          if (selectedText.startsWith('@')) {
+            username = selectedText.substring(1);
+          } else if (selectedText.includes('t.me/')) {
+            username = selectedText.split('t.me/')[1].split('/')[0].split('?')[0];
           }
-        });
-      }
+          
+          if (settings.telegramOpenMethod === 'desktop') {
+            url = `tg://resolve?domain=${username}`;
+          } else {
+            url = `https://t.me/${username}`;
+          }
+        } else {
+          // Try as phone number
+          const telegramPhone = cleanPhoneNumber(selectedText);
+          if (telegramPhone) {
+            if (settings.telegramOpenMethod === 'desktop') {
+              url = `tg://resolve?phone=${telegramPhone}`;
+            } else {
+              url = `https://t.me/+${telegramPhone}`;
+            }
+          }
+        }
+        break;
+        
+      case 'viber':
+        const viberPhone = cleanPhoneNumber(selectedText);
+        if (viberPhone) {
+          url = `viber://chat?number=${viberPhone}`;
+        }
+        break;
+        
+      case 'signal':
+        const signalPhone = cleanPhoneNumber(selectedText);
+        if (signalPhone) {
+          url = `https://signal.me/#p/${signalPhone}`;
+        }
+        break;
+        
+      case 'youtube':
+        // Search on YouTube
+        url = `https://www.youtube.com/results?search_query=${encodeURIComponent(selectedText)}`;
+        break;
+        
+      case 'google':
+        // Search on Google
+        url = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
+        break;
+    }
+    
+    if (url) {
+      chrome.tabs.create({ url: url }, (newTab) => {
+        // If WhatsApp Web and auto-send is enabled, send message to content script
+        if (info.menuItemId === 'whatsapp' && 
+            settings.whatsappOpenMethod === 'web' && 
+            settings.autoSend) {
+          // Wait for tab to load
+          chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+            if (tabId === newTab.id && changeInfo.status === 'complete') {
+              chrome.tabs.onUpdated.removeListener(listener);
+              // Send message to content script to auto-click send
+              chrome.tabs.sendMessage(newTab.id, { action: 'autoSend' });
+            }
+          });
+        }
+      });
     }
   }
 });
