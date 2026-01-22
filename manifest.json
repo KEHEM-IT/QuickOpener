@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "QuickWhatsApp",
+  "name": "Quick Opener",
   "version": "1.0.0",
   "description": "Quickly open selected phone numbers in WhatsApp, Telegram, and other messaging apps",
   "permissions": [

@@ -1,4 +1,4 @@
-# QuickWhatsApp Chrome Extension
+# Quick Opener Chrome Extension
 
 A Chrome extension that allows you to quickly open selected phone numbers in WhatsApp, Telegram, Viber, and Signal.
 
