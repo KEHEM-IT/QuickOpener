@@ -6,13 +6,16 @@ A Chrome extension that allows you to quickly open selected text in various apps
 
 - **Right-click context menu**: Select any text on a webpage, right-click, and choose "Open with" to see available options
 - **Messaging Apps**: Open phone numbers directly in WhatsApp, Telegram, Viber, and Signal
+- **Gmail Compose**: Quickly compose emails with auto-populated recipient and CC
 - **YouTube Search**: Search selected text on YouTube
 - **Google Search**: Search selected text on Google
 - **Auto country code**: Automatically adds your default country code if phone numbers don't include one
-- **Customizable**: Configure default country code and enable/disable specific apps
+- **Customizable**: Configure default country code, CC recipients, and enable/disable specific apps
 - **Desktop App Support**: Choose between web or desktop apps for WhatsApp and Telegram
 - **Smart parsing**: Handles various formats including:
   - Phone numbers: +880 1881-024577, 01881-024577
+  - Email addresses: user@example.com
+  - mailto: links
   - Telegram usernames: @username
   - Telegram links: t.me/username
   - Any text for YouTube/Google search
@@ -39,6 +42,14 @@ A Chrome extension that allows you to quickly open selected text in various apps
 2. **Right-click** and choose **"Open with" → Telegram**
 3. Opens the user/channel in Telegram Web or Desktop app (based on your settings)
 
+### For Gmail Compose
+1. **Select an email address** or **right-click on a mailto: link**
+2. **Right-click** and choose **"Open with" → Gmail**
+3. Opens Gmail compose window with:
+   - The selected email pre-filled in the "To" field
+   - CC field automatically filled (if configured in settings)
+4. Works with both plain text email addresses and mailto: links
+
 ### For YouTube/Google Search
 1. **Select any text** you want to search
 2. **Right-click** and choose **"Open with" → YouTube** or **"Google Search"**
@@ -53,6 +64,7 @@ Click on the extension icon and select "Options" or right-click the extension ic
 - Choose between Web or Desktop app for WhatsApp
 - Choose between Web or Desktop app for Telegram
 - Enable/disable auto-send for WhatsApp Web
+- Configure CC email address for Gmail (optional)
 
 ## App Options
 
@@ -66,6 +78,12 @@ Click on the extension icon and select "Options" or right-click the extension ic
 - **Telegram Web**: Opens in browser at t.me
 - **Telegram Desktop**: Opens in installed desktop application using tg:// protocol
 - Supports: phone numbers, @usernames, and t.me links
+
+### Gmail
+- **Gmail Compose**: Opens Gmail compose window with:
+  - Recipient email pre-filled from selected text or mailto: link
+  - Optional CC recipient from extension settings
+  - Ready to compose your message
 
 ### Other Apps
 - **Viber**: Opens using viber:// protocol (requires Viber installed)
@@ -85,6 +103,11 @@ Click on the extension icon and select "Options" or right-click the extension ic
 - `@username` → Opens telegram user/channel
 - `t.me/username` → Opens telegram user/channel
 - `+880 1881024577` → Opens chat with phone number
+
+### Gmail
+- `user@example.com` → Opens Gmail compose with recipient
+- `mailto:user@example.com` → Opens Gmail compose with recipient
+- Automatically adds CC if configured in settings
 
 ### YouTube/Google
 - Select any text → Search on YouTube or Google

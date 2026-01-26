@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('signal').checked = settings.enabledApps.signal !== false;
       document.getElementById('youtube').checked = settings.enabledApps.youtube !== false;
       document.getElementById('google').checked = settings.enabledApps.google !== false;
+      document.getElementById('gmail').checked = settings.enabledApps.gmail !== false;
       
       // Set WhatsApp open method
       const openMethod = settings.whatsappOpenMethod || 'web';
@@ -28,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Set auto-send
       document.getElementById('autoSend').checked = settings.autoSend !== false;
+      
+      // Set Gmail CC
+      document.getElementById('gmailCC').value = settings.gmailCC || '';
     }
   });
 });
@@ -63,11 +67,13 @@ document.getElementById('saveBtn').addEventListener('click', () => {
       viber: document.getElementById('viber').checked,
       signal: document.getElementById('signal').checked,
       youtube: document.getElementById('youtube').checked,
-      google: document.getElementById('google').checked
+      google: document.getElementById('google').checked,
+      gmail: document.getElementById('gmail').checked
     },
     whatsappOpenMethod: whatsappOpenMethod,
     telegramOpenMethod: telegramOpenMethod,
-    autoSend: document.getElementById('autoSend').checked
+    autoSend: document.getElementById('autoSend').checked,
+    gmailCC: document.getElementById('gmailCC').value.trim()
   };
   
   chrome.storage.sync.set({ settings }, () => {

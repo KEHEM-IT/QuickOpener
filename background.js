@@ -10,11 +10,13 @@ let settings = {
     viber: true,
     signal: true,
     youtube: true,
-    google: true
+    google: true,
+    gmail: true
   },
   whatsappOpenMethod: 'web', // 'web', 'desktop', or 'wame'
   telegramOpenMethod: 'web', // 'web' or 'desktop'
-  autoSend: true
+  autoSend: true,
+  gmailCC: '' // CC email for Gmail compose
 };
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -100,6 +102,15 @@ function createContextMenus() {
         contexts: ['selection']
       });
     }
+
+    if (settings.enabledApps.gmail) {
+      chrome.contextMenus.create({
+        id: 'gmail',
+        parentId: 'openWith',
+        title: 'Gmail',
+        contexts: ['selection', 'link']
+      });
+    }
   });
 }
 
@@ -179,6 +190,20 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         // Search on Google
         url = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
         break;
+        
+      case 'gmail':
+        // Open Gmail compose
+        const email = extractEmail(info.linkUrl || selectedText);
+        if (email) {
+          url = `https://mail.google.com/mail/u/0/#inbox?compose=new`;
+          // Add email to URL parameters
+          url += `&to=${encodeURIComponent(email)}`;
+          // Add CC if configured
+          if (settings.gmailCC && settings.gmailCC.trim()) {
+            url += `&cc=${encodeURIComponent(settings.gmailCC.trim())}`;
+          }
+        }
+        break;
     }
     
     if (url) {
@@ -229,6 +254,26 @@ function cleanPhoneNumber(text) {
   // Validate phone number (should have at least 10 digits)
   if (cleaned.length >= 10 && cleaned.length <= 15) {
     return cleaned;
+  }
+  
+  return null;
+}
+
+function extractEmail(text) {
+  if (!text) return null;
+  
+  // If it's a mailto link, extract the email
+  if (text.startsWith('mailto:')) {
+    const email = text.replace('mailto:', '').split('?')[0];
+    return email;
+  }
+  
+  // Use regex to find email in text
+  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
+  const match = text.match(emailRegex);
+  
+  if (match && match[1]) {
+    return match[1];
   }
   
   return null;

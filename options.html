@@ -4,262 +4,226 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quick Opener Settings</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="tailwind-local.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #0f172a;
       min-height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
     }
-    
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      transition: all 0.2s;
     }
-    
-    .option-card {
-      transition: all 0.3s ease;
+    .card:hover { background: #273548; }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: #8b5cf6;
+      border-color: #8b5cf6;
     }
-    
-    .option-card:hover {
-      transform: translateY(-2px);
-      background: rgba(255, 255, 255, 0.08);
-    }
-    
-    .checkbox-custom:checked {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-color: #667eea;
-    }
-    
-    .radio-custom:checked {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-color: #667eea;
-    }
-    
     .btn-save {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transition: all 0.3s ease;
+      background: #8b5cf6;
+      transition: all 0.2s;
     }
-    
     .btn-save:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+      background: #7c3aed;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
     }
-    
-    .status-animation {
-      animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .input-glow:focus {
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-    }
-    
-    .section-divider {
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      height: 1px;
-    }
+    input:focus { outline: 2px solid #8b5cf6; outline-offset: 2px; }
   </style>
 </head>
-<body class="p-6">
-  <div class="max-w-4xl mx-auto">
+<body class="p-4">
+  <div class="max-w-3xl mx-auto">
+    
     <!-- Header -->
-    <div class="glass-effect rounded-2xl p-8 mb-6 shadow-2xl">
-      <div class="flex items-center gap-4 mb-3">
-        <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center shadow-lg">
-          <i class="fas fa-bolt text-3xl text-white"></i>
+    <div class="card rounded-xl p-4 mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
+          <i class="fas fa-bolt text-2xl text-white"></i>
         </div>
         <div>
-          <h1 class="text-4xl font-bold text-white mb-1">Quick Opener</h1>
-          <p class="text-purple-200">Configure your extension settings</p>
+          <h1 class="text-2xl font-bold text-white">Quick Opener</h1>
+          <p class="text-sm text-gray-400">Configure extension settings</p>
         </div>
       </div>
     </div>
 
-    <!-- Country Code Section -->
-    <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl">
-      <div class="flex items-center gap-3 mb-4">
-        <i class="fas fa-globe text-2xl text-purple-300"></i>
-        <h2 class="text-2xl font-bold text-white">Default Country Code</h2>
+    <!-- Country Code -->
+    <div class="card rounded-xl p-4 mb-4">
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fas fa-globe text-purple-400"></i>
+        <h2 class="text-lg font-bold text-white">Default Country Code</h2>
       </div>
-      <div class="section-divider mb-4"></div>
-      <div class="bg-white bg-opacity-5 rounded-xl p-4">
-        <label for="countryCode" class="block text-sm font-medium text-purple-200 mb-2">
-          Country Code (without +)
-        </label>
-        <input 
-          type="text" 
-          id="countryCode" 
-          placeholder="880" 
-          value="880"
-          class="w-full px-4 py-3 bg-white bg-opacity-10 border border-purple-300 border-opacity-30 rounded-lg text-white placeholder-purple-300 focus:outline-none input-glow transition-all"
-        >
-        <p class="text-purple-200 text-sm mt-2">
-          <i class="fas fa-info-circle mr-1"></i>
-          Used when selected number doesn't include a country code
-        </p>
-      </div>
+      <input 
+        type="text" 
+        id="countryCode" 
+        placeholder="880" 
+        value="880"
+        class="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-500"
+      >
+      <p class="text-xs text-gray-400 mt-2">
+        <i class="fas fa-info-circle mr-1"></i>Used when number has no country code
+      </p>
     </div>
 
-    <!-- Apps Section -->
-    <div class="glass-effect rounded-2xl p-6 mb-6 shadow-xl">
-      <div class="flex items-center gap-3 mb-4">
-        <i class="fas fa-th-large text-2xl text-purple-300"></i>
-        <h2 class="text-2xl font-bold text-white">Enabled Apps</h2>
+    <!-- Apps -->
+    <div class="card rounded-xl p-4 mb-4">
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fas fa-th-large text-purple-400"></i>
+        <h2 class="text-lg font-bold text-white">Enabled Apps</h2>
       </div>
-      <div class="section-divider mb-6"></div>
 
       <!-- WhatsApp -->
-      <div class="mb-6">
-        <div class="option-card glass-effect rounded-xl p-4 mb-3">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" id="whatsapp" checked class="w-5 h-5 checkbox-custom rounded border-2 border-purple-300">
-            <i class="fab fa-whatsapp text-2xl text-green-400 mx-3"></i>
-            <span class="text-lg font-semibold text-white">WhatsApp</span>
-          </label>
-        </div>
+      <div class="mb-3">
+        <label class="card flex items-center p-3 rounded-lg cursor-pointer">
+          <input type="checkbox" id="whatsapp" checked class="w-4 h-4 rounded">
+          <i class="fab fa-whatsapp text-xl text-green-400 mx-3"></i>
+          <span class="font-semibold text-white">WhatsApp</span>
+        </label>
 
-        <div class="ml-12 space-y-3 bg-white bg-opacity-5 rounded-xl p-4">
-          <p class="text-purple-200 font-medium mb-3">
-            <i class="fas fa-cog mr-2"></i>Open WhatsApp using:
-          </p>
+        <div class="ml-10 mt-2 space-y-2 bg-slate-800 rounded-lg p-3">
+          <p class="text-sm text-gray-400 mb-2"><i class="fas fa-cog mr-1"></i>Open using:</p>
           
-          <label class="option-card flex items-start p-3 rounded-lg cursor-pointer">
-            <input type="radio" id="openWeb" name="openMethod" value="web" checked class="w-4 h-4 mt-1 radio-custom">
-            <div class="ml-3 flex-1">
-              <div class="text-white font-medium">WhatsApp Web</div>
-              <div class="text-purple-200 text-sm">Opens in browser (web.whatsapp.com)</div>
+          <label class="card flex items-start p-2 rounded cursor-pointer">
+            <input type="radio" id="openWeb" name="openMethod" value="web" checked class="w-4 h-4 mt-0.5">
+            <div class="ml-2 flex-1">
+              <div class="text-white text-sm font-medium">WhatsApp Web</div>
+              <div class="text-xs text-gray-400">Opens in browser</div>
             </div>
           </label>
 
-          <label class="option-card flex items-start p-3 rounded-lg cursor-pointer">
-            <input type="radio" id="openDesktop" name="openMethod" value="desktop" class="w-4 h-4 mt-1 radio-custom">
-            <div class="ml-3 flex-1">
-              <div class="text-white font-medium">WhatsApp Desktop App</div>
-              <div class="text-purple-200 text-sm">Opens in installed desktop application</div>
+          <label class="card flex items-start p-2 rounded cursor-pointer">
+            <input type="radio" id="openDesktop" name="openMethod" value="desktop" class="w-4 h-4 mt-0.5">
+            <div class="ml-2 flex-1">
+              <div class="text-white text-sm font-medium">Desktop App</div>
+              <div class="text-xs text-gray-400">Opens installed application</div>
             </div>
           </label>
 
-          <label class="option-card flex items-start p-3 rounded-lg cursor-pointer">
-            <input type="radio" id="openWaMe" name="openMethod" value="wame" class="w-4 h-4 mt-1 radio-custom">
-            <div class="ml-3 flex-1">
-              <div class="text-white font-medium">wa.me Link</div>
-              <div class="text-purple-200 text-sm">Let system choose (may ask which app to use)</div>
+          <label class="card flex items-start p-2 rounded cursor-pointer">
+            <input type="radio" id="openWaMe" name="openMethod" value="wame" class="w-4 h-4 mt-0.5">
+            <div class="ml-2 flex-1">
+              <div class="text-white text-sm font-medium">wa.me Link</div>
+              <div class="text-xs text-gray-400">System chooses app</div>
             </div>
           </label>
 
-          <label class="option-card flex items-start p-3 rounded-lg cursor-pointer bg-yellow-500 bg-opacity-10">
-            <input type="checkbox" id="autoSend" checked class="w-5 h-5 mt-1 checkbox-custom rounded">
-            <div class="ml-3 flex-1">
-              <div class="text-white font-medium">
-                <i class="fas fa-paper-plane mr-2"></i>Auto-click Send button
+          <label class="card flex items-start p-2 rounded cursor-pointer bg-yellow-900 bg-opacity-20">
+            <input type="checkbox" id="autoSend" checked class="w-4 h-4 mt-0.5 rounded">
+            <div class="ml-2 flex-1">
+              <div class="text-white text-sm font-medium">
+                <i class="fas fa-paper-plane mr-1"></i>Auto-click Send
               </div>
-              <div class="text-yellow-200 text-sm">
-                <i class="fas fa-exclamation-triangle mr-1"></i>
-                Only works with WhatsApp Web
-              </div>
+              <div class="text-xs text-yellow-400">Only works with WhatsApp Web</div>
             </div>
           </label>
         </div>
       </div>
 
       <!-- Telegram -->
-      <div class="mb-6">
-        <div class="option-card glass-effect rounded-xl p-4 mb-3">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" id="telegram" checked class="w-5 h-5 checkbox-custom rounded border-2 border-purple-300">
-            <i class="fab fa-telegram text-2xl text-blue-400 mx-3"></i>
-            <span class="text-lg font-semibold text-white">Telegram</span>
-          </label>
-        </div>
+      <div class="mb-3">
+        <label class="card flex items-center p-3 rounded-lg cursor-pointer">
+          <input type="checkbox" id="telegram" checked class="w-4 h-4 rounded">
+          <i class="fab fa-telegram text-xl text-blue-400 mx-3"></i>
+          <span class="font-semibold text-white">Telegram</span>
+        </label>
 
-        <div class="ml-12 space-y-3 bg-white bg-opacity-5 rounded-xl p-4">
-          <p class="text-purple-200 font-medium mb-3">
-            <i class="fas fa-cog mr-2"></i>Open Telegram using:
-          </p>
+        <div class="ml-10 mt-2 space-y-2 bg-slate-800 rounded-lg p-3">
+          <p class="text-sm text-gray-400 mb-2"><i class="fas fa-cog mr-1"></i>Open using:</p>
           
-          <label class="option-card flex items-start p-3 rounded-lg cursor-pointer">
-            <input type="radio" id="telegramWeb" name="telegramMethod" value="web" checked class="w-4 h-4 mt-1 radio-custom">
-            <div class="ml-3 flex-1">
-              <div class="text-white font-medium">Telegram Web</div>
-              <div class="text-purple-200 text-sm">Opens in browser (t.me)</div>
+          <label class="card flex items-start p-2 rounded cursor-pointer">
+            <input type="radio" id="telegramWeb" name="telegramMethod" value="web" checked class="w-4 h-4 mt-0.5">
+            <div class="ml-2 flex-1">
+              <div class="text-white text-sm font-medium">Telegram Web</div>
+              <div class="text-xs text-gray-400">Opens in browser (t.me)</div>
             </div>
           </label>
 
-          <label class="option-card flex items-start p-3 rounded-lg cursor-pointer">
-            <input type="radio" id="telegramDesktop" name="telegramMethod" value="desktop" class="w-4 h-4 mt-1 radio-custom">
-            <div class="ml-3 flex-1">
-              <div class="text-white font-medium">Telegram Desktop App</div>
-              <div class="text-purple-200 text-sm">Opens in installed desktop application</div>
+          <label class="card flex items-start p-2 rounded cursor-pointer">
+            <input type="radio" id="telegramDesktop" name="telegramMethod" value="desktop" class="w-4 h-4 mt-0.5">
+            <div class="ml-2 flex-1">
+              <div class="text-white text-sm font-medium">Desktop App</div>
+              <div class="text-xs text-gray-400">Opens installed application</div>
             </div>
           </label>
 
-          <div class="text-purple-200 text-sm bg-blue-500 bg-opacity-10 p-3 rounded-lg">
-            <i class="fas fa-lightbulb mr-2"></i>
-            Works with phone numbers, @usernames, and t.me links
+          <div class="text-xs text-gray-400 bg-blue-900 bg-opacity-20 p-2 rounded">
+            <i class="fas fa-lightbulb mr-1"></i>Works with phone numbers, @usernames, and t.me links
           </div>
         </div>
       </div>
 
       <!-- Other Apps -->
-      <div class="space-y-3">
-        <div class="option-card glass-effect rounded-xl p-4">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" id="viber" checked class="w-5 h-5 checkbox-custom rounded border-2 border-purple-300">
-            <i class="fab fa-viber text-2xl text-purple-400 mx-3"></i>
-            <span class="text-lg font-semibold text-white">Viber</span>
-          </label>
-        </div>
+      <div class="space-y-2">
+        <label class="card flex items-center p-3 rounded-lg cursor-pointer">
+          <input type="checkbox" id="viber" checked class="w-4 h-4 rounded">
+          <i class="fab fa-viber text-xl text-purple-400 mx-3"></i>
+          <span class="font-semibold text-white">Viber</span>
+        </label>
 
-        <div class="option-card glass-effect rounded-xl p-4">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" id="signal" checked class="w-5 h-5 checkbox-custom rounded border-2 border-purple-300">
-            <i class="fas fa-lock text-2xl text-blue-300 mx-3"></i>
-            <span class="text-lg font-semibold text-white">Signal</span>
-          </label>
-        </div>
+        <label class="card flex items-center p-3 rounded-lg cursor-pointer">
+          <input type="checkbox" id="signal" checked class="w-4 h-4 rounded">
+          <i class="fas fa-lock text-xl text-blue-300 mx-3"></i>
+          <span class="font-semibold text-white">Signal</span>
+        </label>
 
-        <div class="option-card glass-effect rounded-xl p-4">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" id="youtube" checked class="w-5 h-5 checkbox-custom rounded border-2 border-purple-300">
-            <i class="fab fa-youtube text-2xl text-red-500 mx-3"></i>
-            <span class="text-lg font-semibold text-white">YouTube Search</span>
-          </label>
-        </div>
+        <label class="card flex items-center p-3 rounded-lg cursor-pointer">
+          <input type="checkbox" id="youtube" checked class="w-4 h-4 rounded">
+          <i class="fab fa-youtube text-xl text-red-500 mx-3"></i>
+          <span class="font-semibold text-white">YouTube Search</span>
+        </label>
 
-        <div class="option-card glass-effect rounded-xl p-4">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" id="google" checked class="w-5 h-5 checkbox-custom rounded border-2 border-purple-300">
-            <i class="fab fa-google text-2xl text-yellow-400 mx-3"></i>
-            <span class="text-lg font-semibold text-white">Google Search</span>
-          </label>
-        </div>
+        <label class="card flex items-center p-3 rounded-lg cursor-pointer">
+          <input type="checkbox" id="google" checked class="w-4 h-4 rounded">
+          <i class="fab fa-google text-xl text-yellow-400 mx-3"></i>
+          <span class="font-semibold text-white">Google Search</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Gmail Settings -->
+    <div class="card rounded-xl p-4 mb-4">
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fas fa-envelope text-purple-400"></i>
+        <h2 class="text-lg font-bold text-white">Gmail Settings</h2>
+      </div>
+
+      <label class="card flex items-center p-3 rounded-lg cursor-pointer mb-3">
+        <input type="checkbox" id="gmail" checked class="w-4 h-4 rounded">
+        <i class="fas fa-envelope text-xl text-red-500 mx-3"></i>
+        <span class="font-semibold text-white">Gmail Compose</span>
+      </label>
+
+      <div class="bg-slate-800 rounded-lg p-3">
+        <label class="text-sm text-gray-300 mb-2 block">
+          <i class="fas fa-user-plus mr-1"></i>CC Email (optional)
+        </label>
+        <input 
+          type="email" 
+          id="gmailCC" 
+          placeholder="example@gmail.com"
+          class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-gray-500"
+        >
+        <p class="text-xs text-gray-400 mt-2">
+          <i class="fas fa-info-circle mr-1"></i>This email will be automatically added to CC when composing
+        </p>
+      </div>
+
+      <div class="text-xs text-gray-400 bg-blue-900 bg-opacity-20 p-2 rounded mt-3">
+        <i class="fas fa-lightbulb mr-1"></i>Works with mailto: links and selected email addresses
       </div>
     </div>
 
     <!-- Save Button -->
-    <div class="text-center mb-6">
-      <button id="saveBtn" class="btn-save px-8 py-4 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-2xl">
-        <i class="fas fa-save mr-2"></i>
-        Save Settings
-      </button>
-    </div>
+    <button id="saveBtn" class="w-full btn-save px-6 py-3 text-white font-bold rounded-lg">
+      <i class="fas fa-save mr-2"></i>Save Settings
+    </button>
 
     <!-- Status Message -->
-    <div id="statusMessage" class="hidden status-animation glass-effect rounded-xl p-4 text-center">
-      <i class="fas fa-check-circle text-2xl text-green-400 mr-2"></i>
-      <span class="text-white font-medium text-lg"></span>
+    <div id="statusMessage" class="hidden card rounded-lg p-3 text-center mt-3">
+      <i class="fas fa-check-circle text-green-400 mr-2"></i>
+      <span class="text-white font-medium"></span>
     </div>
   </div>
 
