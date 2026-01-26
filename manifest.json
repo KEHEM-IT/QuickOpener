@@ -7,15 +7,34 @@
     "contextMenus",
     "storage",
     "tabs",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Quick Opener (Alt+Q)"
+  },
+  "commands": {
+    "open-quick-menu": {
+      "suggested_key": {
+        "default": "Alt+Q",
+        "mac": "Alt+Q"
+      },
+      "description": "Open Quick Opener menu"
+    }
+  },
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://web.whatsapp.com/*"],
+      "matches": ["<all_urls>"],
       "js": ["content.js"],
+      "css": ["menu.css"],
       "run_at": "document_idle"
     }
   ],

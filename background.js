@@ -16,27 +16,91 @@ let settings = {
   whatsappOpenMethod: 'web', // 'web', 'desktop', or 'wame'
   telegramOpenMethod: 'web', // 'web' or 'desktop'
   autoSend: true,
-  gmailCC: '' // CC email for Gmail compose
+  gmailTo: [], // Array of TO emails for Gmail compose
+  gmailCC: [] // Array of CC emails for Gmail compose
 };
 
-chrome.runtime.onInstalled.addListener(() => {
-  // Load saved settings
+// Function to load settings from storage
+function loadSettings(callback) {
   chrome.storage.sync.get(['settings'], (result) => {
     if (result.settings) {
       settings = { ...settings, ...result.settings };
+      // Ensure arrays exist
+      if (!Array.isArray(settings.gmailTo)) {
+        settings.gmailTo = [];
+      }
+      if (!Array.isArray(settings.gmailCC)) {
+        settings.gmailCC = [];
+      }
+      console.log('Settings loaded:', settings);
     }
+    if (callback) callback();
   });
+}
 
+// Load settings on startup
+loadSettings(() => {
   createContextMenus();
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  loadSettings(() => {
+    createContextMenus();
+  });
 });
 
 // Listen for settings changes
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.settings) {
-    settings = changes.settings.newValue;
-    createContextMenus();
+    console.log('Settings changed:', changes.settings.newValue);
+    loadSettings(() => {
+      createContextMenus();
+    });
   }
 });
+
+// Listen for keyboard commands
+chrome.commands.onCommand.addListener((command) => {
+  console.log('Command received:', command);
+  if (command === 'open-quick-menu') {
+    openQuickMenu();
+  }
+});
+
+// Listen for toolbar icon click
+chrome.action.onClicked.addListener((tab) => {
+  console.log('Toolbar icon clicked');
+  openQuickMenu();
+});
+
+function openQuickMenu() {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]) {
+      console.log('Sending openQuickMenu to tab:', tabs[0].id);
+      chrome.tabs.sendMessage(tabs[0].id, { action: 'openQuickMenu' }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('Error sending message:', chrome.runtime.lastError);
+          // Try to inject content script if it's not loaded
+          chrome.scripting.executeScript({
+            target: { tabId: tabs[0].id },
+            files: ['content.js']
+          }, () => {
+            if (chrome.runtime.lastError) {
+              console.error('Error injecting script:', chrome.runtime.lastError);
+            } else {
+              // Try again after injection
+              setTimeout(() => {
+                chrome.tabs.sendMessage(tabs[0].id, { action: 'openQuickMenu' });
+              }, 100);
+            }
+          });
+        } else {
+          console.log('Message sent successfully:', response);
+        }
+      });
+    }
+  });
+}
 
 function createContextMenus() {
   // Remove existing menus
@@ -114,144 +178,143 @@ function createContextMenus() {
   });
 }
 
+// Listen for messages from content script (keyboard shortcut)
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'openWith') {
+    handleOpenWith(request.app, request.text, sender.tab);
+    sendResponse({ status: 'ok' });
+  }
+  return true;
+});
+
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.selectionText) {
-    const selectedText = info.selectionText.trim();
-    let url = '';
-    
-    switch (info.menuItemId) {
-      case 'whatsapp':
-        const phoneNumber = cleanPhoneNumber(selectedText);
-        if (phoneNumber) {
-          // Choose URL based on settings
-          if (settings.whatsappOpenMethod === 'desktop') {
-            // WhatsApp Desktop protocol
-            url = `whatsapp://send?phone=${phoneNumber}`;
-          } else if (settings.whatsappOpenMethod === 'web') {
-            // WhatsApp Web
-            url = `https://web.whatsapp.com/send?phone=${phoneNumber}`;
-          } else {
-            // wa.me (lets system choose)
-            url = `https://wa.me/${phoneNumber}`;
-          }
-        }
-        break;
-        
-      case 'telegram':
-        // Check if it's a phone number or username/link
-        if (selectedText.startsWith('@') || selectedText.includes('t.me/')) {
-          // Username or link
-          let username = selectedText;
-          if (selectedText.startsWith('@')) {
-            username = selectedText.substring(1);
-          } else if (selectedText.includes('t.me/')) {
-            username = selectedText.split('t.me/')[1].split('/')[0].split('?')[0];
-          }
-          
-          if (settings.telegramOpenMethod === 'desktop') {
-            url = `tg://resolve?domain=${username}`;
-          } else {
-            url = `https://t.me/${username}`;
-          }
-        } else {
-          // Try as phone number
-          const telegramPhone = cleanPhoneNumber(selectedText);
-          if (telegramPhone) {
-            if (settings.telegramOpenMethod === 'desktop') {
-              url = `tg://resolve?phone=${telegramPhone}`;
-            } else {
-              url = `https://t.me/+${telegramPhone}`;
-            }
-          }
-        }
-        break;
-        
-      case 'viber':
-        const viberPhone = cleanPhoneNumber(selectedText);
-        if (viberPhone) {
-          url = `viber://chat?number=${viberPhone}`;
-        }
-        break;
-        
-      case 'signal':
-        const signalPhone = cleanPhoneNumber(selectedText);
-        if (signalPhone) {
-          url = `https://signal.me/#p/${signalPhone}`;
-        }
-        break;
-        
-      case 'youtube':
-        // Search on YouTube
-        url = `https://www.youtube.com/results?search_query=${encodeURIComponent(selectedText)}`;
-        break;
-        
-      case 'google':
-        // Search on Google
-        url = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
-        break;
-        
-      case 'gmail':
-        // Open Gmail compose
-        const email = extractEmail(info.linkUrl || selectedText);
-        if (email) {
-          url = `https://mail.google.com/mail/u/0/#inbox?compose=new`;
-          // Add email to URL parameters
-          url += `&to=${encodeURIComponent(email)}`;
-          // Add CC if configured
-          if (settings.gmailCC && settings.gmailCC.trim()) {
-            url += `&cc=${encodeURIComponent(settings.gmailCC.trim())}`;
-          }
-        }
-        break;
-    }
-    
-    if (url) {
-      chrome.tabs.create({ url: url }, (newTab) => {
-        // If WhatsApp Web and auto-send is enabled, send message to content script
-        if (info.menuItemId === 'whatsapp' && 
-            settings.whatsappOpenMethod === 'web' && 
-            settings.autoSend) {
-          // Wait for tab to load
-          chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-            if (tabId === newTab.id && changeInfo.status === 'complete') {
-              chrome.tabs.onUpdated.removeListener(listener);
-              // Send message to content script to auto-click send
-              chrome.tabs.sendMessage(newTab.id, { action: 'autoSend' });
-            }
-          });
-        }
-      });
-    }
+  if (info.selectionText || info.linkUrl) {
+    const selectedText = info.selectionText ? info.selectionText.trim() : '';
+    handleOpenWith(info.menuItemId, selectedText, tab, info);
   }
 });
 
+function handleOpenWith(appId, selectedText, tab, info = null) {
+  let url = '';
+  
+  switch (appId) {
+    case 'whatsapp':
+      const phoneNumber = cleanPhoneNumber(selectedText);
+      if (phoneNumber) {
+        if (settings.whatsappOpenMethod === 'desktop') {
+          url = `whatsapp://send?phone=${phoneNumber}`;
+        } else if (settings.whatsappOpenMethod === 'web') {
+          url = `https://web.whatsapp.com/send?phone=${phoneNumber}`;
+        } else {
+          url = `https://wa.me/${phoneNumber}`;
+        }
+      }
+      break;
+      
+    case 'telegram':
+      if (selectedText.startsWith('@') || selectedText.includes('t.me/')) {
+        let username = selectedText;
+        if (selectedText.startsWith('@')) {
+          username = selectedText.substring(1);
+        } else if (selectedText.includes('t.me/')) {
+          username = selectedText.split('t.me/')[1].split('/')[0].split('?')[0];
+        }
+        
+        if (settings.telegramOpenMethod === 'desktop') {
+          url = `tg://resolve?domain=${username}`;
+        } else {
+          url = `https://t.me/${username}`;
+        }
+      } else {
+        const telegramPhone = cleanPhoneNumber(selectedText);
+        if (telegramPhone) {
+          if (settings.telegramOpenMethod === 'desktop') {
+            url = `tg://resolve?phone=${telegramPhone}`;
+          } else {
+            url = `https://t.me/+${telegramPhone}`;
+          }
+        }
+      }
+      break;
+      
+    case 'viber':
+      const viberPhone = cleanPhoneNumber(selectedText);
+      if (viberPhone) {
+        url = `viber://chat?number=${viberPhone}`;
+      }
+      break;
+      
+    case 'signal':
+      const signalPhone = cleanPhoneNumber(selectedText);
+      if (signalPhone) {
+        url = `https://signal.me/#p/${signalPhone}`;
+      }
+      break;
+      
+    case 'youtube':
+      url = `https://www.youtube.com/results?search_query=${encodeURIComponent(selectedText)}`;
+      break;
+      
+    case 'google':
+      url = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
+      break;
+      
+    case 'gmail':
+      let email = null;
+      
+      // Check if it's from context menu with link
+      if (info && info.linkUrl) {
+        email = extractEmail(info.linkUrl);
+      }
+      // If no link or email not found, try selection text
+      if (!email && selectedText) {
+        email = extractEmail(selectedText);
+      }
+      
+      if (email) {
+        console.log('Building Gmail URL with settings:', settings);
+        url = buildGmailUrl(email);
+        console.log('Gmail URL:', url);
+      }
+      break;
+  }
+  
+  if (url) {
+    chrome.tabs.create({ url: url }, (newTab) => {
+      // If WhatsApp Web and auto-send is enabled, send message to content script
+      if (appId === 'whatsapp' && 
+          settings.whatsappOpenMethod === 'web' && 
+          settings.autoSend) {
+        // Wait for tab to load
+        chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+          if (tabId === newTab.id && changeInfo.status === 'complete') {
+            chrome.tabs.onUpdated.removeListener(listener);
+            chrome.tabs.sendMessage(newTab.id, { action: 'autoSend' });
+          }
+        });
+      }
+    });
+  }
+}
+
 function cleanPhoneNumber(text) {
-  // Remove all non-digit characters except '+'
   let cleaned = text.replace(/[^\d+]/g, '');
   
-  // Check if it starts with '+'
   if (cleaned.startsWith('+')) {
-    // Remove the '+' sign
     cleaned = cleaned.substring(1);
   } else if (cleaned.startsWith('00')) {
-    // Handle international format starting with 00
     cleaned = cleaned.substring(2);
   } else if (cleaned.startsWith('0')) {
-    // Local format, add default country code
     cleaned = settings.defaultCountryCode + cleaned.substring(1);
   } else if (!cleaned.startsWith(settings.defaultCountryCode) && cleaned.length < 12) {
-    // Doesn't have country code and is not international format
-    // If it starts with 1 and is 10 digits for Bangladesh mobile
     if (cleaned.startsWith('1') && cleaned.length === 10) {
       cleaned = settings.defaultCountryCode + cleaned;
     } else if (cleaned.length > 6) {
-      // For other cases, add default country code
       cleaned = settings.defaultCountryCode + cleaned;
     }
   }
   
-  // Validate phone number (should have at least 10 digits)
   if (cleaned.length >= 10 && cleaned.length <= 15) {
     return cleaned;
   }
@@ -262,13 +325,11 @@ function cleanPhoneNumber(text) {
 function extractEmail(text) {
   if (!text) return null;
   
-  // If it's a mailto link, extract the email
   if (text.startsWith('mailto:')) {
     const email = text.replace('mailto:', '').split('?')[0];
     return email;
   }
   
-  // Use regex to find email in text
   const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
   const match = text.match(emailRegex);
   
@@ -277,4 +338,26 @@ function extractEmail(text) {
   }
   
   return null;
+}
+
+function buildGmailUrl(selectedEmail) {
+  let url = 'https://mail.google.com/mail/?view=cm&fs=1';
+  
+  const toEmails = Array.isArray(settings.gmailTo) ? [...settings.gmailTo] : [];
+  if (selectedEmail && !toEmails.includes(selectedEmail)) {
+    toEmails.push(selectedEmail);
+  }
+  
+  console.log('TO emails:', toEmails);
+  console.log('CC emails:', settings.gmailCC);
+  
+  if (toEmails.length > 0) {
+    url += '&to=' + toEmails.map(e => encodeURIComponent(e)).join(',');
+  }
+  
+  if (Array.isArray(settings.gmailCC) && settings.gmailCC.length > 0) {
+    url += '&cc=' + settings.gmailCC.map(e => encodeURIComponent(e)).join(',');
+  }
+  
+  return url;
 }
